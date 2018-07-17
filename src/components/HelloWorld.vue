@@ -24,13 +24,14 @@ export default {
       controls: null,
       url: '',
       mixers: [],
-      clock: null
+      clock: null,
+      stats: null
     }
   },
   mounted () {
     this.scene = new THREE.Scene()
     this.clock = new THREE.Clock()
-    this.camera = new THREE.PerspectiveCamera(75, 400 / 400, 1, 2000)
+    this.camera = new THREE.PerspectiveCamera(75, (window.innerWidth - 100) / (window.innerHeight - 100), 1, 2000)
     this.camera.position.set(0, 18, 28)
 
     this.controls = new THREE.OrbitControls(this.camera)
@@ -53,9 +54,11 @@ export default {
       preserveDrawingBuffer: true
     })
     this.renderer.setPixelRatio(window.devicePixelRatio)
-    this.renderer.setSize(400, 400)
+    this.renderer.setSize(window.innerWidth - 100, window.innerHeight - 100)
     this.renderer.shadowMap.enabled = true
     this.$refs.div.appendChild(this.renderer.domElement)
+    this.stats = new window.Stats()
+    this.$refs.div.appendChild(this.stats.dom)
     setTimeout(() => {
       this.animate()
     })
@@ -98,9 +101,9 @@ export default {
       readerFile.readAsDataURL(file)
     },
     windowResize () {
-      this.camera.aspect = 400 / 400
+      this.camera.aspect = (window.innerWidth - 100) / (window.innerHeight - 100)
       this.camera.updateProjectionMatrix()
-      this.renderer.setSize(400, 400)
+      this.renderer.setSize((window.innerWidth - 100), (window.innerHeight - 100))
     },
     animate () {
       requestAnimationFrame(this.animate)
@@ -111,6 +114,7 @@ export default {
           }
         }
         this.renderer.render(this.scene, this.camera)
+        this.stats.update()
       })
     },
     getUrl () {
