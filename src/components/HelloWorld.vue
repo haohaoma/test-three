@@ -11,9 +11,9 @@
 
 <script>
 import * as THREE from 'three'
-import './FBXLoader'
-import './GLTFLoader'
-import './OrbitControls'
+import FBXLoader from 'three-fbxloader-offical'
+import GLTFLoader from 'three-gltf-loader'
+import OrbitControls from 'three-orbitcontrols'
 export default {
   data () {
     return {
@@ -31,12 +31,13 @@ export default {
     }
   },
   mounted () {
+    console.log(THREE)
     this.scene = new THREE.Scene()
     this.clock = new THREE.Clock()
     this.camera = new THREE.PerspectiveCamera(75, (window.innerWidth - 100) / (window.innerHeight - 100), 1, 2000)
     this.camera.position.set(0, 18, 28)
 
-    this.controls = new THREE.OrbitControls(this.camera)
+    this.controls = new OrbitControls(this.camera)
     this.controls.target.set(0, 10, 0)
     this.controls.update()
 
@@ -75,7 +76,7 @@ export default {
       let type = this.file.name.split('.')[this.file.name.split('.').length - 1]
       let readerFile = new FileReader()
       readerFile.onload = () => {
-        this.loader = type === 'glb' ? new THREE.GLTFLoader() : new THREE.FBXLoader()
+        this.loader = type === 'glb' ? new GLTFLoader() : new FBXLoader()
         this.mixers = []
         this.loader.load(readerFile.result, (object) => {
           let obj = Object.keys(object).includes('scene') ? object.scene : object
