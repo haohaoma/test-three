@@ -12,6 +12,7 @@
 <script>
 import * as THREE from 'three'
 import './FBXLoader'
+import './GLTFLoader'
 import './OrbitControls'
 export default {
   data () {
@@ -70,23 +71,25 @@ export default {
   methods: {
     change (e) {
       let file = e.target.files[0]
+      let type = file.name.split('.')[file.name.split('.').length - 1]
       let readerFile = new FileReader()
       readerFile.onload = () => {
-        this.loader = new THREE.FBXLoader()
+        this.loader = type === 'glb' ? new THREE.GLTFLoader() : new THREE.FBXLoader()
         this.mixers = []
         this.loader.load(readerFile.result, (object) => {
+          let obj = Object.keys(object).includes('scene') ? object.scene : object
           this.scene.children.forEach(item => {
-            if (item.type === 'Group') {
+            if (item.type === 'Group' || item.type === 'Scene') {
               this.scene.remove(item)
             }
           })
 
-          if (object.animations.length > 0) {
-            object.mixer = new THREE.AnimationMixer(object)
-            this.mixers.push(object.mixer)
-            let action = object.mixer.clipAction(object.animations[0])
+          if (obj.animations && Array.isArray(obj.animations) && obj.animations.length > 0) {
+            obj.mixer = new THREE.AnimationMixer(obj)
+            this.mixers.push(obj.mixer)
+            let action = obj.mixer.clipAction(obj.animations[0])
             action.play()
-            object.traverse(child => {
+            obj.traverse(child => {
               if (child.isMesh) {
                 child.castShadow = true
                 child.receiveShadow = true
@@ -94,8 +97,8 @@ export default {
             })
           }
 
-          this.scene.add(object)
-          object.scale.multiplyScalar(0.3)
+          this.scene.add(obj)
+          obj.scale.multiplyScalar(0.3)
         })
       }
       readerFile.readAsDataURL(file)
