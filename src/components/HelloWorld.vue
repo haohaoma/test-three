@@ -26,7 +26,8 @@ export default {
       url: '',
       mixers: [],
       clock: null,
-      stats: null
+      stats: null,
+      file: null
     }
   },
   mounted () {
@@ -70,8 +71,8 @@ export default {
   },
   methods: {
     change (e) {
-      let file = e.target.files[0]
-      let type = file.name.split('.')[file.name.split('.').length - 1]
+      this.file = e.target.files[0]
+      let type = this.file.name.split('.')[this.file.name.split('.').length - 1]
       let readerFile = new FileReader()
       readerFile.onload = () => {
         this.loader = type === 'glb' ? new THREE.GLTFLoader() : new THREE.FBXLoader()
@@ -101,7 +102,7 @@ export default {
           obj.scale.multiplyScalar(0.3)
         })
       }
-      readerFile.readAsDataURL(file)
+      readerFile.readAsDataURL(this.file)
     },
     windowResize () {
       this.camera.aspect = (window.innerWidth - 100) / (window.innerHeight - 100)
@@ -123,6 +124,19 @@ export default {
     getUrl () {
       let canvas = document.getElementsByTagName('canvas')[0]
       this.url = canvas.toDataURL()
+      console.log(this.dataURLtoFile(this.url, this.file ? this.file.name.substr(0, this.file.name.lastIndexOf('.')) : 'file'))
+    },
+    dataURLtoFile (dataurl, filename) {
+      let arr = dataurl.split(',')
+      let mime = arr[0].match(/:(.*?);/)[1]
+      let suffix = mime.split('/')[1]
+      let bstr = atob(arr[1])
+      let n = bstr.length
+      let u8arr = new Uint8Array(n)
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n)
+      }
+      return new File([u8arr], `${filename}.${suffix}`, {type: mime})
     }
   }
 }
